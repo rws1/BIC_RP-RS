@@ -1,0 +1,3 @@
+
+#python guide to creating a MLP with a logistic activiation function 
+https://www.allaboutcircuits.com/technical-articles/how-to-create-a-multilayer-perceptron-neural-network-in-python/
