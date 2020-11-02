@@ -1,3 +1,24 @@
 
 #python guide to creating a MLP with a logistic activiation function 
 https://www.allaboutcircuits.com/technical-articles/how-to-create-a-multilayer-perceptron-neural-network-in-python/
+
+---------------------general info about implementing activation functions on python -----------------
+
+https://medium.com/@omkar.nallagoni/activation-functions-with-derivative-and-python-code-sigmoid-vs-tanh-vs-relu-44d23915c1f4 <----- this ones very nice!
+
+https://towardsdatascience.com/implementing-different-activation-functions-and-weight-initialization-methods-using-python-c78643b9f20f
+
+https://medium.com/ai%C2%B3-theory-practice-business/a-beginners-guide-to-numpy-with-sigmoid-relu-and-softmax-activation-functions-25b840a9a272
+
+----------Info on tan--------------
+
+#information on Tan as activation function 
+https://sefiks.com/2017/01/29/hyperbolic-tangent-as-neural-network-activation-function/#:~:text=In%20neural%20networks%2C%20as%20an,for%20error%20effects%20on%20weights.&text=In%20other%20words%2C%20function%20produces%20output%20for%20every%20x%20value.
+
+https://www.geeksforgeeks.org/numpy-tanh-python/
+
+#why tan can outperform Sigmoid
+https://stats.stackexchange.com/questions/330559/why-is-tanh-almost-always-better-than-sigmoid-as-an-activation-function
+
+
+----------Info on cosine-------------
