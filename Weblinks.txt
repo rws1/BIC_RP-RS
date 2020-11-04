@@ -26,4 +26,9 @@ https://stats.stackexchange.com/questions/330559/why-is-tanh-almost-always-bette
 
 
 ----------ANN Development---------------
+
+fancy one 
 https://towardsdatascience.com/coding-a-2-layer-neural-network-from-scratch-in-python-4dd022d19fd2
+
+non-fancy
+https://www.kdnuggets.com/2019/11/build-artificial-neural-network-scratch-part-1.html
