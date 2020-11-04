@@ -22,3 +22,8 @@ https://stats.stackexchange.com/questions/330559/why-is-tanh-almost-always-bette
 
 
 ----------Info on cosine-------------
+
+
+
+----------ANN Development---------------
+https://towardsdatascience.com/coding-a-2-layer-neural-network-from-scratch-in-python-4dd022d19fd2
