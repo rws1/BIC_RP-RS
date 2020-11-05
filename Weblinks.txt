@@ -32,3 +32,17 @@ https://towardsdatascience.com/coding-a-2-layer-neural-network-from-scratch-in-p
 
 non-fancy
 https://www.kdnuggets.com/2019/11/build-artificial-neural-network-scratch-part-1.html
+
+
+
+---------------------PSO---------------------
+https://github.com/kuhess/pso-ann
+
+This one is with felixi layers- useful
+https://github.com/asbudhkar/ANN-PSO
+
+ANN +PSO
+https://medium.com/@zeeshanahmad10809/train-neural-network-numpy-particle-swarm-optimization-pso-93f289fc8a8e
+https://github.com/zeeshanahmad10809/neural-net-pso
+
+
