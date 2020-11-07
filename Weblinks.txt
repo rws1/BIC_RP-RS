@@ -46,5 +46,6 @@ https://medium.com/@zeeshanahmad10809/train-neural-network-numpy-particle-swarm-
 https://github.com/zeeshanahmad10809/neural-net-pso
 
 ------------------references------------------------------
-Designing Artificial Neural Networks Using Particle Swarm Optimization Algorithms
-1 - https://www.hindawi.com/journals/cin/2015/369298/
+- Designing Artificial Neural Networks Using Particle Swarm Optimization Algorithms
+    https://doi.org/10.1155/2015/369298
+    https://www.hindawi.com/journals/cin/2015/369298/
