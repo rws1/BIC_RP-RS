@@ -53,5 +53,11 @@ https://github.com/zeeshanahmad10809/neural-net-pso
  Garro, B. and Vázquez, R., 2015. Designing Artificial Neural Networks Using Particle Swarm Optimization Algorithms. Computational Intelligence and Neuroscience, 2015, pp.1-20.
     
 - Swarm Intelligence in Cellular Robotic Systems
+ https://doi.org/10.1007/978-3-642-58069-7_38
+ 
+Beni G., Wang J. (1993) Swarm Intelligence in Cellular Robotic Systems. In: Dario P., Sandini G., Aebischer P. (eds) Robots and Biological Systems: Towards a New Bionics?. NATO ASI Series (Series F: Computer and Systems Sciences), vol 102. Springer, Berlin, Heidelberg.
 
-Beni G., Wang J. (1993) Swarm Intelligence in Cellular Robotic Systems. In: Dario P., Sandini G., Aebischer P. (eds) Robots and Biological Systems: Towards a New Bionics?. NATO ASI Series (Series F: Computer and Systems Sciences), vol 102. Springer, Berlin, Heidelberg. https://doi.org/10.1007/978-3-642-58069-7_38
+- Evolving artificial neural networks
+https://ieeexplore.ieee.org/abstract/document/784219
+
+Xin Yao, 1999. Evolving artificial neural networks. Proceedings of the IEEE, 87(9), pp.1423-1447.
