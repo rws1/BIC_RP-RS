@@ -1,0 +1,12 @@
+ANN hyper parameters:
+1. Linear function with linear activation function
+2. Linear Function with sigmoid activation function
+3. Linear Function with tan activation function
+4. Pick the best out of Sigmoid and Tan for multilayer ANN
+5. Increase number of nodes in hidden layers
+
+PSO hyper parameters:
+1. apha range
+2. position range
+3. velocity range
+4. cognetic and social components
