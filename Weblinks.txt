@@ -66,3 +66,10 @@ Beni G., Wang J. (1993) Swarm Intelligence in Cellular Robotic Systems. In: Dari
 https://ieeexplore.ieee.org/abstract/document/784219
 
 Xin Yao, 1999. Evolving artificial neural networks. Proceedings of the IEEE, 87(9), pp.1423-1447.
+
+-------------------------- lucid chard diagrams ---------------------------------
+PSO 
+https://lucid.app/invitations/accept/abecd48b-b653-4c30-a318-f085a5d282ab
+
+ANN
+https://lucid.app/invitations/accept/4ffb5100-e04d-4a8e-a2ed-71a64978419f
