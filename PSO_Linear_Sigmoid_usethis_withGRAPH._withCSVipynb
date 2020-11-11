@@ -1,0 +1,816 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "class Particle:\n",
+    "   \n",
+    "    def __init__(self, dims, p_range, v_range):\n",
+    "        \n",
+    "        #dims = number of dimensions\n",
+    "        #p= position of the particle in the dimentional space\n",
+    "        #v = velocity of the particle in the dimensional space\n",
+    "        #p_range = range of dimensions \n",
+    "        #v_range = range of velocities\n",
+    "        \n",
+    "        #let the position and velocity of a praticle be randomly selected from uniform distribution\n",
+    "        self.p = np.random.uniform(p_range[0], p_range[1], (dims, ))\n",
+    "        self.v = np.random.uniform(v_range[0], v_range[1], (dims, )) \n",
+    "        \n",
+    "        #the best position for any particle can be positive infinity\n",
+    "        self.pbest = float('inf') #-1 #np.inf\n",
+    "        \n",
+    "        #define particles best position based on specified dimensions\n",
+    "        self.pbestpos = np.zeros((dims, ))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "class Swarm:\n",
+    "    \n",
+    "    def __init__(self, particle_no, dims, p_range, v_range, alpha_range, component):\n",
+    "        \n",
+    "        #particle_no = number of particles\n",
+    "        #dims = dimensions\n",
+    "        #p_range = range of dimensions \n",
+    "        #v_range = range of velocities\n",
+    "        #alpha_range = inertia weight range\n",
+    "        #components = cognetive and social components\n",
+    "        \n",
+    "        \n",
+    "        #define the swarm with praticles from Class Particle\n",
+    "        self.p = np.array([Particle(dims, p_range, v_range) for i in range(particle_no)])\n",
+    "        \n",
+    "        #define global best as infinity\n",
+    "        self.gbest = float('inf')  #np.inf\n",
+    "        \n",
+    "        #define global best poition\n",
+    "        self.gbestpos = np.zeros((dims, ))\n",
+    "        \n",
+    "        self.p_range = p_range\n",
+    "        self.v_range = v_range\n",
+    "        \n",
+    "        self.alpha_range = alpha_range\n",
+    "        \n",
+    "        #components\n",
+    "        self.component0 = component[0]\n",
+    "        self.component1 = component[1]\n",
+    "        self.dims = dims\n",
+    "        \n",
+    "        \n",
+    "        \n",
+    "    def drawGraph(self):\n",
+    "        plt.plot(range(100), self.mserror, color='black')\n",
+    "       \n",
+    "    def optimize(self, function, input_X, output_Y,  print_step,  iter):\n",
+    "        informants = 6 \n",
+    "        for i in range(iter):\n",
+    "            for particle in self.p:\n",
+    "                fitness = function(input_X, output_Y, particle.p)\n",
+    "\n",
+    "                #select the particles best position\n",
+    "                if fitness.any() < particle.pbest:\n",
+    "                    particle.pbest = fitness.any()\n",
+    "                    particle.pbestpos = particle.p.copy()\n",
+    "                    \n",
+    "            for i in range(informants):\n",
+    "                for particle in self.p:          \n",
+    "                \n",
+    "                #select the global best position    \n",
+    "                 if fitness.any()< self.gbest:\n",
+    "                    self.gbest = fitness.any()\n",
+    "                    self.gbestpos = particle.p.copy()\n",
+    "                    \n",
+    "\n",
+    "            for particle in self.p:\n",
+    "               \n",
+    "                alpha = np.random.uniform(self.alpha_range[0], self.alpha_range[1], 1)[0]\n",
+    "                \n",
+    "                #velocity update formula\n",
+    "                particle.v = alpha * particle.v + (self.component0 * np.random.uniform(0.0, 1.0, (self.dims, )) * \\\n",
+    "                (particle.pbestpos - particle.p)) + (self.component1 * np.random.uniform(0.0, 1.0, (self.dims, )) \\\n",
+    "                * (self.gbestpos - particle.p))\n",
+    "                epsilon = 0.2\n",
+    "                #particle.v = particle.v.clip(min=self.v_range[0], max=self.v_range[1])\n",
+    "                particle.p = particle.p + epsilon * particle.v\n",
+    "                #print(particle.p)\n",
+    "                #particle.x = particle.x.clip(min=self.x_range[0], max=self.x_range[1])\n",
+    "                    \n",
+    "            #if i % print_step == 0:\n",
+    "               # print('iteration#: ', i+1,  ' loss: ', fitness)\n",
+    "\n",
+    "        #print(\"global best loss: \", self.gbest)\n",
+    "        \n",
+    "    def get_best_solution(self):\n",
+    "    \n",
+    "        return self.gbestpos   \n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "import csv\n",
+    "with open(\"X_linear.csv\", 'r') as f:\n",
+    "    Xin = list(csv.reader(f, delimiter=\";\"))\n",
+    "import numpy as np\n",
+    "Xin = np.array(Xin[1:], dtype=np.float)\n",
+    "#print(Xin)\n",
+    "#print(Xin.shape)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "#input_X = layer1_input.values\n",
+    "input_X= Xin\n",
+    "#input_X"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "(100, 1)\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(input_X.shape)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "output_Y = np.zeros(shape=(100,1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "perfect_predict_Y = np.full((100, 1), 1, dtype=int)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def linear(input_X):\n",
+    "    output_Y = input_X\n",
+    "    return output_Y"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "output_Y = linear(input_X)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#ANN architecture\n",
+    "#define no of nodes in each layer..\n",
+    "Input = 1\n",
+    "Hidden = 200\n",
+    "Output = 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'sigmoid' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "\u001b[0;32m<ipython-input-14-4c69d390f077>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0msig_Y\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0msigmoid\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0msigmoid\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0minput_X\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+      "\u001b[0;31mNameError\u001b[0m: name 'sigmoid' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "sig_Y = sigmoid(sigmoid(input_X))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def sigmoid(x):\n",
+    "    return 1/(1+np.exp(-x))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def linear1(input_X):\n",
+    "       return input_X"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Empty DataFrame\n",
+      "Columns: [MSE, Output_Y, Predicted_Y]\n",
+      "Index: []\n"
+     ]
+    }
+   ],
+   "source": [
+    "df = pd.DataFrame(columns=['MSE', 'Output_Y', 'Predicted_Y'])\n",
+    "print(df)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "MSE = []\n",
+    "\n",
+    "def forward_pass(input_X, output_Y, W):\n",
+    "\n",
+    "     \n",
+    "    if isinstance(W, Particle):\n",
+    "        W = W.p\n",
+    "\n",
+    "    w1 = W[0 : Input * Hidden].reshape((Input, Hidden))\n",
+    "\n",
+    "    b1 = W[Input * Hidden:(Input * Hidden) + Hidden].reshape((Hidden, ))\n",
+    "    w2 = W[(Input * Hidden) + Hidden:(Input * Hidden) + Hidden +\\\n",
+    "        (Hidden * Output)].reshape((Hidden, Output))\n",
+    "    \n",
+    "    b2 = W[(Input * Hidden) + Hidden + (Hidden * Output): (Input *\\\n",
+    "        Hidden) + Hidden + (Hidden * Output) + Output].reshape((Output, ))\n",
+    "\n",
+    "\n",
+    "    z1 = np.dot(input_X, w1) + b1\n",
+    "    a1 = sigmoid(z1)\n",
+    "    z2 = np.dot(a1, w2) + b2\n",
+    "    output_from_outputlayer = sigmoid(z2)\n",
+    "    \n",
+    "       \n",
+    "    mserror1 = (np.power((output_from_outputlayer - output_Y), 2)) # **2\n",
+    "    mserror = (mserror1.sum()/100)\n",
+    "    MSE.append(mserror)\n",
+    "    print(mserror)\n",
+    "    \n",
+    "    \n",
+    "    \n",
+    "    return mserror\n",
+    "   "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def pass_information(input_X, W):\n",
+    "\n",
+    "\n",
+    "    if isinstance(W, Particle):\n",
+    "        W = W.p\n",
+    "\n",
+    "    w1 = W[0 : Input * Hidden].reshape((Input, Hidden))\n",
+    "\n",
+    "    b1 = W[Input * Hidden:(Input * Hidden) + Hidden].reshape((Hidden, ))\n",
+    "    w2 = W[(Input * Hidden) + Hidden:(Input * Hidden) + Hidden +\\\n",
+    "        (Hidden * Output)].reshape((Hidden, Output))\n",
+    "    \n",
+    "    b2 = W[(Input * Hidden) + Hidden + (Hidden * Output): (Input *\\\n",
+    "        Hidden) + Hidden + (Hidden * Output) + Output].reshape((Output, ))\n",
+    "\n",
+    "\n",
+    "    z1 = np.dot(input_X, w1) + b1\n",
+    "    a1 = sigmoid(z1)\n",
+    "    z2 = np.dot(a1, w2) + b2\n",
+    "    output_from_outputlayer = sigmoid(z2)\n",
+    "    \n",
+    "       \n",
+    "    mserror1 = (np.power((output_from_outputlayer - output_Y), 2))\n",
+    "    mserror = (mserror1.sum()/100)\n",
+    "   \n",
+    "   # df = pd.DataFrame(columns=['MSE'])\n",
+    "    #df2 = pd.DataFrame(columns=cols, index=range(2))\n",
+    "    \n",
+    "   # df = df.append({'MSE': mserror}, ignore_index=True)\n",
+    "        \n",
+    "    \n",
+    "    \n",
+    "    #df = pd.DataFrame(columns=['MSE'])\n",
+    "\n",
+    "    #df = df.append({'MSE': mserror}, ignore_index=True)\n",
+    "    #print(df)\n",
+    "    \n",
+    "    return df\n",
+    "   "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def predict(input_X, W):\n",
+    "  \n",
+    "    w1 = W[0 : Input * Hidden].reshape((Input, Hidden))\n",
+    "\n",
+    "    b1 = W[Input * Hidden:(Input * Hidden) + Hidden].reshape((Hidden, ))\n",
+    "    w2 = W[(Input * Hidden) + Hidden:(Input * Hidden) + Hidden +\\\n",
+    "        (Hidden * Output)].reshape((Hidden, Output))\n",
+    "    \n",
+    "    b2 = W[(Input * Hidden) + Hidden + (Hidden * Output): (Input *\\\n",
+    "        Hidden) + Hidden + (Hidden * Output) + Output].reshape((Output, ))\n",
+    "\n",
+    "    z1 = np.dot(input_X, w1) + b1\n",
+    "    a1 = sigmoid(z1)\n",
+    "    z2 = np.dot(a1, w2) + b2\n",
+    "    output_from_outputlayer = sigmoid(z2)\n",
+    "    \n",
+    "    comparison = np.round(sig_Y, 2) == np.round(output_from_outputlayer, 2)\n",
+    "   # np.sum(np.round(sig_Y, 2) == np.round(output_from_outputlayer, 2))\n",
+    "    #print((np.round(sig_Y, 2)  == np.round(output_from_outputlayer, 2)).sum())\n",
+    "    #print(comparison.sum())\n",
+    "    \n",
+    "    \n",
+    "    #Y_pred = np.argmax(output_from_outputlayer, axis=1)\n",
+    "   \n",
+    "    #print(output_from_outputlayer.shape)\n",
+    "    Y_pred = comparison.sum()\n",
+    "    return Y_pred"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def get_accuracy(output_Y, Y_pred):\n",
+    "    return (Y_pred)*100/100"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "1.0307914720847366\n",
+      "1.3429713395715688\n",
+      "1.351462665990063\n",
+      "1.349585032056352\n",
+      "1.307983073304338\n",
+      "0.7995232394913455\n",
+      "0.33748048630488425\n",
+      "0.31730604969733794\n",
+      "0.3339733704973111\n",
+      "0.731743297576211\n",
+      "1.212902763996178\n",
+      "1.3149236552840415\n",
+      "1.3187984755696578\n",
+      "1.2678262136604272\n",
+      "1.0629437097389751\n",
+      "0.686317168337748\n",
+      "0.5003232066139219\n",
+      "0.5415068564714454\n",
+      "0.7813236848771028\n",
+      "1.0797289428057677\n",
+      "1.2129086054681715\n",
+      "1.2462723478783504\n",
+      "1.2167977519366495\n",
+      "1.1130743540474202\n",
+      "0.9434126680224167\n",
+      "0.8052025491930896\n",
+      "0.7852451650998663\n",
+      "0.8636593285074441\n",
+      "0.9938148037519464\n",
+      "1.0969084505469497\n",
+      "1.1469914670377725\n",
+      "1.1459129385768263\n",
+      "1.102378151990103\n",
+      "1.0219263816065873\n",
+      "0.9468951447151319\n",
+      "0.9092681310443431\n",
+      "0.9272959784311091\n",
+      "0.98600543843246\n",
+      "1.0488311716804022\n",
+      "1.088609541563401\n",
+      "1.1005776918674748\n",
+      "1.0823799199168136\n",
+      "1.0451429775787349\n",
+      "1.0069174809928758\n",
+      "0.9816967146762109\n",
+      "0.9813128975810603\n",
+      "1.0008422318176304\n",
+      "1.0284828622400697\n",
+      "1.0516260172969978\n",
+      "1.0611190897315759\n",
+      "1.057531056849558\n",
+      "1.0427862263714807\n",
+      "1.02496320183874\n",
+      "1.0123899320170735\n",
+      "1.0097583798373813\n",
+      "1.016128177032955\n",
+      "1.0279372116835537\n",
+      "1.0390769176064725\n",
+      "1.04537145897578\n",
+      "1.0449427069180248\n",
+      "1.0382248681113437\n",
+      "1.0290688911031471\n",
+      "1.021901311326892\n",
+      "1.0205388946274763\n",
+      "1.0237987972234441\n",
+      "1.0289591506394995\n",
+      "1.0343052667691308\n",
+      "1.0380068693149191\n",
+      "1.037553663289856\n",
+      "1.0346948539283036\n",
+      "1.0307747622964625\n",
+      "1.0268033418370153\n",
+      "1.0252079426388285\n",
+      "1.0262853380719785\n",
+      "1.029371659347442\n",
+      "1.0324954749118609\n",
+      "1.0343578730930016\n",
+      "1.0343620986909676\n",
+      "1.032973073969748\n",
+      "1.0307845170791785\n",
+      "1.0289984210727838\n",
+      "1.0282512878838264\n",
+      "1.0290861423727444\n",
+      "1.030494278076213\n",
+      "1.0317044460841276\n",
+      "1.032435873651493\n",
+      "1.0323815102003837\n",
+      "1.0316593995880063\n",
+      "1.0307057605532262\n",
+      "1.0297603084685445\n",
+      "1.0294663100505659\n",
+      "1.0297390323048952\n",
+      "1.0304616879415094\n",
+      "1.031356534897963\n",
+      "1.031904665651804\n",
+      "1.0318829263648115\n",
+      "1.031516266775737\n",
+      "1.0308778990051184\n",
+      "1.0303015598853158\n",
+      "1.0301460159981175\n",
+      "1.0301296245765477\n",
+      "1.0303620204126467\n",
+      "1.0306799258424721\n",
+      "1.0310283159294185\n",
+      "1.0313020269586837\n",
+      "1.031328111134533\n",
+      "1.0311430019208903\n",
+      "1.0309307892608632\n",
+      "1.030575216255202\n",
+      "1.0303435694037268\n",
+      "1.0303116100366758\n",
+      "1.0304952549299806\n",
+      "1.030789256041475\n",
+      "1.0310335750074027\n",
+      "1.0311349645482992\n",
+      "1.031082214532699\n",
+      "1.030912803089806\n",
+      "1.0307224408862323\n",
+      "1.0306212610514869\n",
+      "1.0305866690913599\n",
+      "1.0306506641464113\n",
+      "1.0307514370099193\n",
+      "1.0308489840305912\n",
+      "1.0309136060616684\n",
+      "1.030932178838282\n",
+      "1.030894632305028\n",
+      "1.03082650552888\n",
+      "1.0307475320950883\n",
+      "1.0306867170638114\n",
+      "1.030678437983521\n",
+      "1.0307104696210867\n",
+      "1.0307917749467763\n",
+      "1.0308577237161847\n",
+      "1.0308874086107003\n",
+      "1.0308843620608048\n",
+      "1.0308417209882172\n",
+      "1.030778986655831\n",
+      "1.0307345445814347\n",
+      "1.0307237171257868\n",
+      "1.0307399406373794\n",
+      "1.0307798394000327\n",
+      "1.0308241942438803\n",
+      "1.030847767803432\n",
+      "1.0308449239269963\n",
+      "1.0308243960211945\n",
+      "1.0307934024702985\n",
+      "1.0307642691168621\n",
+      "1.0307494547526623\n",
+      "1.0307498414011393\n",
+      "1.0307730724674335\n",
+      "1.030801612660766\n",
+      "1.0308209233494627\n",
+      "1.0308249919768238\n",
+      "1.0308179508761508\n",
+      "1.0308021458384609\n",
+      "1.0307832928780871\n",
+      "1.0307697993912075\n",
+      "1.030769515333843\n",
+      "1.0307771492553188\n",
+      "1.0307868857655789\n",
+      "1.030794864247495\n",
+      "1.0308021189043637\n",
+      "1.030801634349498\n",
+      "1.0307980922536486\n",
+      "1.030792021474316\n",
+      "1.0307856558123458\n",
+      "1.0307838886046106\n",
+      "1.0307854007304953\n",
+      "1.0307884813400916\n",
+      "1.03079176670339\n",
+      "1.0307928987551083\n",
+      "1.0307935966476083\n",
+      "1.0307939839141953\n",
+      "1.0307938269873773\n",
+      "1.0307924871888872\n",
+      "1.0307889488158215\n",
+      "1.0307869710650386\n",
+      "1.030787425238236\n",
+      "1.030789348456218\n",
+      "1.0307914000983744\n",
+      "1.030792403118457\n",
+      "1.0307932881638382\n",
+      "1.0307933621959786\n",
+      "1.0307927029791575\n",
+      "1.0307916638905674\n",
+      "1.03079062731959\n",
+      "1.0307907219459296\n",
+      "1.0307910392644686\n",
+      "1.0307917238411148\n",
+      "1.03079237934673\n",
+      "1.0307926457621779\n",
+      "1.0307923286357972\n",
+      "1.0307915210139693\n",
+      "1.0307906186088889\n",
+      "1.0307899918727372\n",
+      "1.030790140462266\n",
+      "1.0307909273417697\n",
+      "1.0307918902475641\n",
+      "1.0307926691238998\n",
+      "1.0307928504055\n"
+     ]
+    },
+    {
+     "ename": "NameError",
+     "evalue": "name 'sig_Y' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "\u001b[0;32m<ipython-input-22-486867398db0>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[1;32m     14\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     15\u001b[0m     \u001b[0mW\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0ms\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mget_best_solution\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 16\u001b[0;31m     \u001b[0mY_pred\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mpredict\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0minput_X\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mW\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     17\u001b[0m     \u001b[0maccuracy\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mget_accuracy\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0moutput_Y\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mY_pred\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     18\u001b[0m     \u001b[0mAverage_accuracy\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0maccuracy\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0msum\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m/\u001b[0m\u001b[0miterations\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m<ipython-input-20-97b5afec659a>\u001b[0m in \u001b[0;36mpredict\u001b[0;34m(input_X, W)\u001b[0m\n\u001b[1;32m     15\u001b[0m     \u001b[0moutput_from_outputlayer\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0msigmoid\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mz2\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     16\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 17\u001b[0;31m     \u001b[0mcomparison\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mround\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0msig_Y\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m2\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mround\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0moutput_from_outputlayer\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m2\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     18\u001b[0m    \u001b[0;31m# np.sum(np.round(sig_Y, 2) == np.round(output_from_outputlayer, 2))\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     19\u001b[0m     \u001b[0;31m#print((np.round(sig_Y, 2)  == np.round(output_from_outputlayer, 2)).sum())\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;31mNameError\u001b[0m: name 'sig_Y' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "if __name__ == '__main__':\n",
+    "    no_solution = 1\n",
+    " \n",
+    "    dims = (Input * Hidden) + Hidden + (Hidden * Output) + Output\n",
+    "    w_range = (-1, 1)\n",
+    "    lr_range = (0.0, 0.5)\n",
+    "    alpha_range = (0.8, 0.9)  \n",
+    "    components = (3, 1)  \n",
+    "    #arr = np.array(output_from_outputlayer)\n",
+    "    s = Swarm(no_solution, dims, w_range, lr_range, alpha_range, components)\n",
+    "    \n",
+    "    iterations = 200\n",
+    "    s.optimize(forward_pass, input_X, output_Y, 200,iterations)\n",
+    "    \n",
+    "    W = s.get_best_solution()\n",
+    "    Y_pred = predict(input_X, W)\n",
+    "    accuracy = get_accuracy(output_Y, Y_pred)\n",
+    "    Average_accuracy = accuracy.sum()/iterations\n",
+    "  \n",
+    "    \n",
+    "    #for i in range(iterations):\n",
+    "        #pass_info = pass_information(input_X, W)\n",
+    "       # print(pass_info)\n",
+    "    \n",
+    "    \n",
+    "    \n",
+    "    #df2 = pd.DataFrame(columns=['Accuracy', 'Average Solution Accuracy'])\n",
+    "    #df2 = df2.append({'Accuracy': accuracy, 'Average Solution Accuracy': Average_accuracy}, ignore_index=True)\n",
+    "   # print(df2)\n",
+    "    \n",
+    "    print(\"Accuracy: %.3f\"% Average_accuracy)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "<ipython-input-23-2c40b0ee455c>:5: UserWarning: Matplotlib is currently using module://ipykernel.pylab.backend_inline, which is a non-GUI backend, so cannot show the figure.\n",
+      "  graph_ms.show()\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "[<matplotlib.lines.Line2D at 0x7f9a551deb80>]"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "%matplotlib inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "graph_ms = plt.figure()\n",
+    "g = graph_ms.add_subplot()\n",
+    "graph_ms.show()\n",
+    "g.plot(MSE)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 40,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "200"
+      ]
+     },
+     "execution_count": 40,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(MSE)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "ValueError",
+     "evalue": "Shape of passed values is (200, 1), indices imply (200, 2)",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[0;31mValueError\u001b[0m                                Traceback (most recent call last)",
+      "\u001b[0;32m~/opt/anaconda3/lib/python3.8/site-packages/pandas/core/internals/managers.py\u001b[0m in \u001b[0;36mcreate_block_manager_from_blocks\u001b[0;34m(blocks, axes)\u001b[0m\n\u001b[1;32m   1653\u001b[0m                 blocks = [\n\u001b[0;32m-> 1654\u001b[0;31m                     \u001b[0mmake_block\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mvalues\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mblocks\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mplacement\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mslice\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0maxes\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   1655\u001b[0m                 ]\n",
+      "\u001b[0;32m~/opt/anaconda3/lib/python3.8/site-packages/pandas/core/internals/blocks.py\u001b[0m in \u001b[0;36mmake_block\u001b[0;34m(values, placement, klass, ndim, dtype)\u001b[0m\n\u001b[1;32m   3052\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 3053\u001b[0;31m     \u001b[0;32mreturn\u001b[0m \u001b[0mklass\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mvalues\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mndim\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mndim\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mplacement\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mplacement\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   3054\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/opt/anaconda3/lib/python3.8/site-packages/pandas/core/internals/blocks.py\u001b[0m in \u001b[0;36m__init__\u001b[0;34m(self, values, placement, ndim)\u001b[0m\n\u001b[1;32m    123\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_validate_ndim\u001b[0m \u001b[0;32mand\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mndim\u001b[0m \u001b[0;32mand\u001b[0m \u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmgr_locs\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;34m!=\u001b[0m \u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mvalues\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 124\u001b[0;31m             raise ValueError(\n\u001b[0m\u001b[1;32m    125\u001b[0m                 \u001b[0;34mf\"Wrong number of items passed {len(self.values)}, \"\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;31mValueError\u001b[0m: Wrong number of items passed 1, placement implies 2",
+      "\nDuring handling of the above exception, another exception occurred:\n",
+      "\u001b[0;31mValueError\u001b[0m                                Traceback (most recent call last)",
+      "\u001b[0;32m<ipython-input-38-d1b0ba5c3fa2>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0;31m#define DataFrame\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mdf\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mpd\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mDataFrame\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mrange\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0miterations\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mMSE\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcolumns\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m'Iterations'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'Mean Squared Error'\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;31m#df['MSE'] = MSE\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      3\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m \u001b[0;31m# add data to data frame\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      5\u001b[0m \u001b[0;31m#df[''] = perfect_predict_Y\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/opt/anaconda3/lib/python3.8/site-packages/pandas/core/frame.py\u001b[0m in \u001b[0;36m__init__\u001b[0;34m(self, data, index, columns, dtype, copy)\u001b[0m\n\u001b[1;32m    486\u001b[0m                     \u001b[0mmgr\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0marrays_to_mgr\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0marrays\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcolumns\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mindex\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcolumns\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mdtype\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mdtype\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    487\u001b[0m                 \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 488\u001b[0;31m                     \u001b[0mmgr\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0minit_ndarray\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdata\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mindex\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcolumns\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mdtype\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mdtype\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcopy\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mcopy\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    489\u001b[0m             \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    490\u001b[0m                 \u001b[0mmgr\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0minit_dict\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m{\u001b[0m\u001b[0;34m}\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mindex\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcolumns\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mdtype\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mdtype\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/opt/anaconda3/lib/python3.8/site-packages/pandas/core/internals/construction.py\u001b[0m in \u001b[0;36minit_ndarray\u001b[0;34m(values, index, columns, dtype, copy)\u001b[0m\n\u001b[1;32m    208\u001b[0m         \u001b[0mblock_values\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0mvalues\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    209\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 210\u001b[0;31m     \u001b[0;32mreturn\u001b[0m \u001b[0mcreate_block_manager_from_blocks\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mblock_values\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0mcolumns\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mindex\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    211\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    212\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/opt/anaconda3/lib/python3.8/site-packages/pandas/core/internals/managers.py\u001b[0m in \u001b[0;36mcreate_block_manager_from_blocks\u001b[0;34m(blocks, axes)\u001b[0m\n\u001b[1;32m   1662\u001b[0m         \u001b[0mblocks\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0mgetattr\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mb\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m\"values\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mb\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mb\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mblocks\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1663\u001b[0m         \u001b[0mtot_items\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0msum\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mb\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mshape\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mb\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mblocks\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1664\u001b[0;31m         \u001b[0mconstruction_error\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mtot_items\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mblocks\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mshape\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;36m1\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0maxes\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0me\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   1665\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1666\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m~/opt/anaconda3/lib/python3.8/site-packages/pandas/core/internals/managers.py\u001b[0m in \u001b[0;36mconstruction_error\u001b[0;34m(tot_items, block_shape, axes, e)\u001b[0m\n\u001b[1;32m   1692\u001b[0m     \u001b[0;32mif\u001b[0m \u001b[0mblock_shape\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0;36m0\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1693\u001b[0m         \u001b[0;32mraise\u001b[0m \u001b[0mValueError\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Empty data passed with indices specified.\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1694\u001b[0;31m     \u001b[0;32mraise\u001b[0m \u001b[0mValueError\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34mf\"Shape of passed values is {passed}, indices imply {implied}\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   1695\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1696\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;31mValueError\u001b[0m: Shape of passed values is (200, 1), indices imply (200, 2)"
+     ]
+    }
+   ],
+   "source": [
+    "#define DataFrame\n",
+    "df = pd.DataFrame(range(iterations))\n",
+    "\n",
+    "#add MSE array\n",
+    "df['MSE'] = MSE\n",
+    "\n",
+    "# add data to data frame\n",
+    "#df[''] = perfect_predict_Y\n",
+    "\n",
+    "#add more to data frame \n",
+    "df.columns = ['Iterations', 'Mean Squared Error']\n",
+    "df.set_index('Iterations')\n",
+    "\n",
+    "# save data frame to csv\n",
+    "df.to_csv('MSE.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
